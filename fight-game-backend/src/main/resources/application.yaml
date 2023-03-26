@@ -1,0 +1,18 @@
+ui:
+  canvas:
+    width: 1800
+    height: 900
+  animation:
+    animationIntervalMs: 10
+  action:
+    actionIntervalMs: 20
+    stepPixels: 10
+  webSocket:
+    url: "ws://192.168.1.104"
+    port: ":8080"
+    path: "/webapp"
+    destinationPath: "/game/message"
+    userSubscribePath: "/user/topic/response"
+app:
+  fight:
+    inactiveTimeoutSec: 10

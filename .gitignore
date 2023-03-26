@@ -1,0 +1,6 @@
+*/target
+.idea
+
+/fight-game-frontend/node
+/fight-game-frontend/node_modules
+/fight-game-frontend/build
