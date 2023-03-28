@@ -22,7 +22,7 @@ public enum MessageType {
      */
     JOINED_TO_FIGHT,
     /**
-     * Incoming message with user updates of his state
+     * Incoming message with user events(mouse clicked, button pressed)
      */
-    PLAYER_STATE
+    PLAYER_EVENT
 }

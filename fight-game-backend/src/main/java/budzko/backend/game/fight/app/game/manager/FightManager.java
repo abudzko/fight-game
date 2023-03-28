@@ -50,9 +50,7 @@ public class FightManager {
         String userId = playerEvent.getUserId();
         Optional.ofNullable(players.get(userId))
                 .ifPresentOrElse(
-                        playerContext -> {
-                            gameEngine.updatePlayer(playerContext.getFightId(), playerEvent);
-                        },
+                        playerContext -> gameEngine.updatePlayer(playerContext.getFightId(), playerEvent),
                         () -> log.warn(FAILED_FIGHT_NOT_FOUND_BY_USER_ID.formatted(userId))
                 );
 

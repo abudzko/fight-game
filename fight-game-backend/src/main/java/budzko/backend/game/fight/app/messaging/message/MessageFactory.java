@@ -34,8 +34,8 @@ public class MessageFactory {
         List<PlayerState> states = new ArrayList<>();
         fight.getPlayers().forEach((id, player) -> {
             PlayerState playerState = PlayerState.builder()
-                    .x(player.getX())
-                    .y(player.getY())
+                    .x((int) player.getX())
+                    .y((int) player.getY())
                     .color(player.getColor())
                     .radius(player.getRadius())
                     .playerId(player.getPlayerPublicId())

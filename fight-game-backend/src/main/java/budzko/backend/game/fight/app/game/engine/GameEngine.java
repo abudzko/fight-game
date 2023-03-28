@@ -2,6 +2,7 @@ package budzko.backend.game.fight.app.game.engine;
 
 import budzko.backend.game.fight.app.game.engine.actor.Fight;
 import budzko.backend.game.fight.app.game.engine.actor.Player;
+import budzko.backend.game.fight.app.game.engine.actor.PlayerMouseState;
 import budzko.backend.game.fight.app.game.engine.actor.PlayerMoveState;
 import budzko.backend.game.fight.app.game.manager.player.event.PlayerEvent;
 import budzko.backend.game.fight.app.game.manager.player.event.PlayerEventType;
@@ -23,7 +24,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -99,21 +99,32 @@ public class GameEngine {
 
     public void updatePlayer(String fightId, PlayerEvent playerEvent) {
         String userId = playerEvent.getUserId();
-        if (Objects.requireNonNull(playerEvent.getPlayerEventType()) == PlayerEventType.ARROW) {
-            Optional.ofNullable(fights.get(fightId))
-                    .ifPresentOrElse(
-                            fight -> Optional.ofNullable(fight.getPlayers().get(userId))
-                                    .ifPresentOrElse(
-                                            player -> player.setPlayerMoveState(playerEvent.getPlayerMoveState()),
-                                            () -> {
-                                                throw throwPlayerNotFound(fightId, userId);
+        Optional.ofNullable(fights.get(fightId))
+                .ifPresentOrElse(
+                        fight -> Optional.ofNullable(fight.getPlayers().get(userId))
+                                .ifPresentOrElse(
+                                        player -> {
+
+                                            PlayerEventType playerEventType = playerEvent.getPlayerEventType();
+                                            switch (playerEventType) {
+                                                case ARROW ->
+                                                        player.setPlayerMoveState(playerEvent.getPlayerMoveState());
+                                                case MOUSE ->
+                                                        player.setPlayerMouseState(playerEvent.getPlayerMouseState());
+                                                default -> throw new IllegalStateException(
+                                                        "Failed: Not supported event type %s"
+                                                                .formatted(playerEventType)
+                                                );
                                             }
-                                    ),
-                            () -> {
-                                throw throwFightNotFound(fightId);
-                            }
-                    );
-        }
+                                        },
+                                        () -> {
+                                            throw throwPlayerNotFound(fightId, userId);
+                                        }
+                                ),
+                        () -> {
+                            throw throwFightNotFound(fightId);
+                        }
+                );
     }
 
     private void runActionLoopTask() {
@@ -189,45 +200,122 @@ public class GameEngine {
             }
 
             boolean changePosition(Player player) {
+                boolean changed;
+                changed = handleMoveState(player);
+                if (changed) {
+                    player.getPlayerMouseState().reset();
+                } else {
+                    changed = handleMouseState(player);
+                }
+                return changed;
+            }
+
+            private boolean handleMouseState(Player player) {
                 boolean changed = false;
+                PlayerMouseState playerMouseState = player.getPlayerMouseState();
+                double playerX = player.getX();
+                double playerY = player.getY();
+                if (Math.abs(playerX - playerMouseState.getX()) <= Math.abs(playerMouseState.getDX())
+                        && Math.abs(playerY - playerMouseState.getY()) <= Math.abs(playerMouseState.getDY())) {
+                    //Arrived at the destination
+                    playerMouseState.reset();
+                    return false;
+                }
+                if (playerMouseState.isActive()) {
+                    if (!playerMouseState.isCalculated()) {
+                        calculate(playerMouseState, player);
+                    }
+                    boolean up = playerMouseState.getDY() < 0;
+                    boolean down = playerMouseState.getDY() > 0;
+                    boolean left = playerMouseState.getDX() < 0;
+                    boolean right = playerMouseState.getDX() > 0;
+                    changed = doStep(
+                            player,
+                            Math.abs(playerMouseState.getDX()),
+                            Math.abs(playerMouseState.getDY()),
+                            up,
+                            down,
+                            left,
+                            right
+                    );
+                }
+                return changed;
+            }
+
+            private boolean handleMoveState(Player player) {
+                PlayerMoveState playerMoveState = player.getPlayerMoveState();
+                boolean up = playerMoveState.isUp();
+                boolean down = playerMoveState.isDown();
+                boolean left = playerMoveState.isLeft();
+                boolean right = playerMoveState.isRight();
                 int stepPixels = uiConfig.getAction().getStepPixels();
+                return doStep(player, stepPixels, stepPixels, up, down, left, right);
+            }
+
+            private boolean doStep(
+                    Player player,
+                    double dx,
+                    double dy,
+                    boolean up,
+                    boolean down,
+                    boolean left,
+                    boolean right
+            ) {
                 int canvasWidth = uiConfig.getCanvas().getWidth();
                 int canvasHeight = uiConfig.getCanvas().getHeight();
+                boolean changed = false;
 
-                PlayerMoveState playerMoveState = player.getPlayerMoveState();
-                if (playerMoveState.isUp()) {
-                    if (player.getY() > player.getRadius() + stepPixels) {
-                        player.setY(player.getY() - stepPixels);
+                if (up) {
+                    if (player.getY() > player.getRadius() + dy) {
+                        player.setY(player.getY() - dy);
                     } else {
                         player.setY(player.getRadius());
                     }
                     changed = true;
                 }
-                if (playerMoveState.isDown()) {
-                    if (player.getY() < canvasHeight - stepPixels - player.getRadius()) {
-                        player.setY(player.getY() + stepPixels);
+                if (down) {
+                    if (player.getY() < canvasHeight - dy - player.getRadius()) {
+                        player.setY(player.getY() + dy);
                     } else {
                         player.setY(canvasHeight - player.getRadius());
                     }
                     changed = true;
                 }
-                if (playerMoveState.isLeft()) {
-                    if (player.getX() > player.getRadius() + stepPixels) {
-                        player.setX(player.getX() - stepPixels);
+                if (left) {
+                    if (player.getX() > player.getRadius() + dx) {
+                        player.setX(player.getX() - dx);
                     } else {
                         player.setX(player.getRadius());
                     }
                     changed = true;
                 }
-                if (playerMoveState.isRight()) {
-                    if (player.getX() < canvasWidth - stepPixels - player.getRadius()) {
-                        player.setX(player.getX() + stepPixels);
+                if (right) {
+                    if (player.getX() < canvasWidth - dx - player.getRadius()) {
+                        player.setX(player.getX() + dx);
                     } else {
                         player.setX(canvasWidth - player.getRadius());
                     }
                     changed = true;
                 }
                 return changed;
+            }
+
+            private void calculate(PlayerMouseState playerMouseState, Player player) {
+                int x = playerMouseState.getX();
+                int y = playerMouseState.getY();
+                int stepPixels = uiConfig.getAction().getStepPixels();
+                double lx = x - player.getX();
+                double ly = y - player.getY();
+                double distance = Math.sqrt(Math.pow(lx, 2) + Math.pow(ly, 2));
+                double cosA = lx / distance;
+                double sinA = ly / distance;
+
+                double dx = stepPixels * cosA;
+                double dy = stepPixels * sinA;
+
+                playerMouseState.setDX(dx);
+                playerMouseState.setDY(dy);
+                playerMouseState.setCalculated(true);
             }
         });
         task.start();

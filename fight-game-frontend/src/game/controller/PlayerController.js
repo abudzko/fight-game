@@ -1,4 +1,4 @@
-import { Message, PLAYER_STATE, CREATE_FIGHT, JOIN_FIGHT, FIGHT_ID } from '../../message/Message'
+import { Message, PLAYER_EVENT, CREATE_FIGHT, JOIN_FIGHT } from '../../message/Message'
 
 export default class PlayerController {
 
@@ -18,7 +18,7 @@ export default class PlayerController {
     }
 
     action() {
-        this.sendMoveState();
+        this.sendEvents();
     }
 
     attach(element) {
@@ -33,6 +33,11 @@ export default class PlayerController {
             this.changeDirection(event, false);
         }
         this.element.addEventListener("keyup", this.keyUpEventListener);
+
+        this.mouseClickEventListener = (event) => {
+            this.setOnClickMousePosition(event);
+        }
+        this.element.addEventListener("click", this.mouseClickEventListener);
 
         this.timerId = setInterval(() => this.action(), this.config.action.actionIntervalMs);
     }
@@ -66,22 +71,33 @@ export default class PlayerController {
         }
     }
 
-    sendMoveState() {
-        if (this.stateChanged) {
-            let message = Message.create();
-            message.msgType = PLAYER_STATE;
-            let move = this.player.moveDirection
+    setOnClickMousePosition(event) {
+        if (!this.player) {
+            console.log("Skip:", "player wasn't set")
+            return;
+        }
+        this.player.mouse.x = event.clientX;
+        this.player.mouse.y = event.clientY;
+        this.mouseClicked = true;
+    }
 
-            let event = {};
-            message.arrowEvent = event;
-            message.arrowEvent.up = move.up;
-            message.arrowEvent.down = move.down;
-            message.arrowEvent.left = move.left;
-            message.arrowEvent.right = move.right;
+    sendEvents() {
+        if (this.stateChanged || this.mouseClicked) {
+            let message = Message.create();
+            message.msgType = PLAYER_EVENT;
+
+            if (this.stateChanged) {
+                message.arrowEvent = this.player.moveDirection;
+                this.stateChanged = false;
+            }
+
+            if (this.mouseClicked) {
+                message.mouseEvent = this.player.mouse;
+                this.mouseClicked = false;
+            }
 
             let jsonMsg = JSON.stringify(message);
             this.messageRouter.send(jsonMsg);
-            this.stateChanged = false;
         }
     }
 
@@ -108,5 +124,6 @@ export default class PlayerController {
         clearInterval(this.timerId);
         this.element.removeEventListener("keydown", this.keyDownEventListerer);
         this.element.removeEventListener("keyup", this.keyUpEventListener);
+        this.element.removeEventListener("click", this.mouseClickEventListener);
     }
 }

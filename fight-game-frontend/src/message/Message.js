@@ -12,7 +12,7 @@ export const CREATE_FIGHT = "CREATE_FIGHT";
 export const FIGHT_CREATED = "FIGHT_CREATED";
 export const JOIN_FIGHT = "JOIN_FIGHT";
 export const JOINED_TO_FIGHT = "JOINED_TO_FIGHT";
-export const PLAYER_STATE = "PLAYER_STATE";
+export const PLAYER_EVENT = "PLAYER_EVENT";
 export const FIGHT_UPDATE = "FIGHT_UPDATE";
 
 

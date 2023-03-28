@@ -7,10 +7,11 @@ import java.util.UUID;
 @Data
 public class Player {
     private final String playerPublicId = UUID.randomUUID().toString();
-    private PlayerMoveState playerMoveState = new PlayerMoveState();
+    private PlayerMoveState playerMoveState = PlayerMoveState.builder().build();
+    private PlayerMouseState playerMouseState = PlayerMouseState.builder().build();
     private String userId;
-    private int x;
-    private int y;
+    private double x;
+    private double y;
     private int radius;
     private String color;
 }

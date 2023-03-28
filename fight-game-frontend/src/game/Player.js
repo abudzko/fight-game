@@ -15,5 +15,6 @@ export default class Player {
 
     constructor() {
         this.moveDirection = new PlayerMoveDirection();
+        this.mouse = {};
     }
 }

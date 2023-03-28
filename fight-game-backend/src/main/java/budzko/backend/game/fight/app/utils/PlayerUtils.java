@@ -14,7 +14,7 @@ public class PlayerUtils {
         player.setUserId(userId);
         player.setX(random.nextInt(500));
         player.setY(random.nextInt(500));
-        player.setRadius(random.nextInt(30) + 5);
+        player.setRadius(random.nextInt(50) + 5);
         player.setColor(ColorUtils.getRandomHex());
         return player;
     }

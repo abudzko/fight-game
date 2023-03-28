@@ -11,6 +11,8 @@ public class Message {
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Map<String, Boolean> arrowEvent;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private Map<String, String> mouseEvent;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String fightId;
