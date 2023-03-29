@@ -1,8 +1,12 @@
 import { render, screen } from '@testing-library/react';
 import App from './App';
 
-test('renders learn react link', () => {
+test('buttons', () => {
   render(<App />);
-  const linkElement = screen.getByText(/learn react/i);
-  expect(linkElement).toBeInTheDocument();
+  const createFightButton = screen.getByText(/Create Fight/i);
+  expect(createFightButton).toBeInTheDocument();
+  const joinFightButton = screen.getByText(/Join Fight/i);
+  expect(joinFightButton).toBeInTheDocument();
+  const joinRandomFightButton = screen.getByText(/Join Random Fight/i);
+  expect(joinRandomFightButton).toBeInTheDocument();
 });
