@@ -28,13 +28,13 @@ function App(props) {
   if (showMenu) {
     menu =
       <div className="gameMenu">
-        <div className="menuList">
+        {/* <div className="menuList"> */}
           <button className="menuButton" onClick={createFightCallback}>Create Fight</button>
           {/* <div> */}
           <button className="menuButton" onClick={joinFightCallback}>Join Fight</button>
           <button className="menuButton" onClick={joinRandomFightCallback}>Join Random Fight</button>
           {/* </div> */}
-        </div>
+        {/* </div> */}
       </div>
   }
   let game;

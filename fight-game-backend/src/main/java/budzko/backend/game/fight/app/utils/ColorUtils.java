@@ -17,7 +17,6 @@ public class ColorUtils {
                 getRandomInBounds(0, COLOR_BOUND)
         );
     }
-
     private static int getRandomInBounds(int leftBound, int rightBound) {
         return RAND.nextInt(rightBound - leftBound) + leftBound;
     }

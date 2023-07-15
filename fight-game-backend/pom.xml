@@ -4,11 +4,12 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>budzko</groupId>
+        <groupId>budzko.game.fight</groupId>
         <artifactId>fight-game</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
 
+    <groupId>budzko.game.fight.back</groupId>
     <artifactId>fight-game-backend</artifactId>
 
     <properties>
@@ -47,7 +48,7 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>${project.groupId}</groupId>
+            <groupId>budzko.game.fight.frontend</groupId>
             <artifactId>fight-game-frontend</artifactId>
             <version>1.0-SNAPSHOT</version>
             <type>zip</type>
@@ -76,7 +77,6 @@
                         <configuration>
                             <outputDirectory>${build.outputDirectory}/static</outputDirectory>
                             <includeArtifactIds>fight-game-frontend</includeArtifactIds>
-                            <includeGroupIds>${project.groupId}</includeGroupIds>
                             <excludeTransitive>true</excludeTransitive>
                             <excludeTypes>pom</excludeTypes>
                         </configuration>
@@ -94,7 +94,7 @@
                             <artifactId>lombok</artifactId>
                         </exclude>
                         <exclude>
-                            <groupId>${project.groupId}</groupId>
+                            <groupId>budzko.game.fight.frontend</groupId>
                             <artifactId>fight-game-frontend</artifactId>
                         </exclude>
                     </excludes>
